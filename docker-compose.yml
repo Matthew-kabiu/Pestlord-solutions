@@ -1,0 +1,20 @@
+services:
+  pestlord-solutions:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pestlord-solutions
+    ports:
+      - "3012:3012"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # Optional: Mount nginx config for easy updates without rebuild
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3012"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
