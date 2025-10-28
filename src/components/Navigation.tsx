@@ -30,7 +30,7 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
           {/* Left: Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => handleNavClick('home')}>
             <Bug className="h-8 w-8 text-green-700" />
-            <span className="ml-2 text-xl font-bold text-gray-900">Pestlord Solutions</span>
+            <span className="ml-2 text-xl font-bold text-gray-900">Pestlords Fumigation</span>
           </div>
 
           {/* Middle: Page Links */}
