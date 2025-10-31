@@ -119,6 +119,11 @@ export const PLACEHOLDERS = {
   customer: 'https://ui-avatars.com/api/?name=Customer&background=16a34a&color=fff&size=200',
 };
 
+// Chatbot Avatar - AI bot avatar image
+export const CHATBOT_AVATAR = {
+  bot: '/images/PinkBot.jpg', // PestPal AI avatar
+};
+
 // Consolidated export
 export const IMAGES = {
   hero: HERO_IMAGES,
@@ -131,6 +136,7 @@ export const IMAGES = {
   backgrounds: BACKGROUND_IMAGES,
   brand: BRAND_ASSETS,
   placeholders: PLACEHOLDERS,
+  chatbot: CHATBOT_AVATAR,
 };
 
 // Helper function to get image or fallback to placeholder

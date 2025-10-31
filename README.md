@@ -14,6 +14,7 @@ PestLord Solutions is a fully responsive, single-page application that serves as
 - **Book Inspections** - Schedule professional pest inspections with flexible time slots
 - **Explore Services** - Detailed information on termite control, rodent management, fumigation, and more
 - **Contact Support** - Multiple contact channels with integrated communication forms
+- **Chat with PestPal AI** - AI-powered chatbot assistant for pest and fumigation questions
 - **Learn About Us** - Company history, certifications, team expertise, and core values
 
 ---
@@ -31,6 +32,7 @@ PestLord Solutions is a fully responsive, single-page application that serves as
 - **n8n** - Workflow automation for form submissions and data processing
 - **Google Sheets** - Data storage and management via n8n integration
 - **NewsAPI** - Dynamic content delivery for blog functionality
+- **OpenRouter** - AI model provider for PestPal chatbot assistant
 
 ### Deployment
 - **Docker** - Containerized application for consistent deployments
@@ -71,6 +73,11 @@ PestLord Solutions is a fully responsive, single-page application that serves as
    
    # n8n webhook for Contact submissions
    VITE_N8N_CONTACT_WEBHOOK_URL=https://your-n8n-instance.com/webhook/contact
+   
+   # OpenRouter API Configuration (Required for AI Chatbot)
+   VITE_OPENROUTER_API_URL=https://openrouter.ai/api/v1/chat/completions
+   VITE_OPENROUTER_API_KEY=your_api_key_here
+   VITE_OPENROUTER_MODEL_ID=model_name_here
    ```
 
 4. **Start the development server**
@@ -114,9 +121,11 @@ For detailed Docker setup instructions, see [DOCKER_SETUP.md](DOCKER_SETUP.md)
 
 ### Customer Engagement
 - **Interactive Forms** - Quote requests and booking management
+- **AI Chatbot (PestPal)** - AI-powered assistant for pest and fumigation questions
 - **FAQ Section** - Comprehensive answers to common questions
 - **Testimonials** - Client success stories and reviews
 - **Contact Integration** - Phone, email, and location information
+- **WhatsApp Integration** - Direct WhatsApp contact via FAB menu
 
 ### Technical Excellence
 - **Responsive Design** - Mobile-first approach for all devices
@@ -145,11 +154,22 @@ See [Google Sheet.md](Google%20Sheet.md) for data structure details.
 pestlord-solutions/
 ├── src/
 │   ├── components/       # Reusable UI components
+│   │   ├── FloatingActionButton.tsx  # FAB with WhatsApp & AI Chatbot
+│   │   └── Chatbot/                  # AI Chatbot components
+│   │       ├── ChatbotModal.tsx      # Main chatbot interface
+│   │       ├── ChatMessage.tsx       # Message display component
+│   │       └── ChatInput.tsx         # Text input component
+│   ├── lib/             # Utility libraries
+│   │   └── openrouter.ts            # OpenRouter API client
+│   ├── types/           # TypeScript type definitions
+│   │   └── chatbot.ts               # Chatbot types
 │   ├── pages/           # Main page components
 │   ├── constants/      # Configuration and constants
 │   ├── data/           # Static data files
 │   └── App.tsx         # Main application entry
 ├── public/             # Static assets
+│   └── images/
+│       └── PinkBot.jpg # PestPal AI avatar
 ├── Dockerfile          # Docker build configuration
 ├── docker-compose.yml  # Docker orchestration
 └── nginx.conf          # Web server configuration
@@ -180,7 +200,7 @@ npm run lint
 
 ## 📄 License
 
-Copyright © 2024 PestLord Solutions. All rights reserved.
+Copyright © 2024 PestLord Solutions. Created by SpookieLabsInc. All rights reserved.
 
 ---
 

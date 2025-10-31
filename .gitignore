@@ -29,8 +29,6 @@ coverage/
 
 # Environment variables
 .env
-.env.*
-!.env.example
 
 # Logs
 logs/

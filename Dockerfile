@@ -13,6 +13,10 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Copy .env file for build-time environment variables
+# Note: .env must be available in the build context (ensure it's not in .dockerignore)
+COPY .env ./.env
+
 # Build the application
 RUN npm run build
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
+import FloatingActionButton from './components/FloatingActionButton';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
 import BookingPage from './pages/BookingPage';
@@ -59,6 +60,7 @@ function App() {
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
       {renderPage()}
       {currentPage !== 'admin' && <Footer />}
+      {currentPage !== 'admin' && <FloatingActionButton />}
     </div>
   );
 }
