@@ -28,11 +28,11 @@ export function stripMarkdown(text: string): string {
   cleanText = cleanText.replace(/~~([^~]+)~~/g, '$1');
 
   // Remove links [text](url) or [text][ref]
-  cleanText = cleanText.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+  cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
   cleanText = cleanText.replace(/\[([^\]]+)\]\[[^\]]+\]/g, '$1');
 
   // Remove images ![alt](url)
-  cleanText = cleanText.replace(/!\[([^\]]*)\]\([^\)]+\)/g, '');
+  cleanText = cleanText.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
 
   // Remove horizontal rules (--- or ***)
   cleanText = cleanText.replace(/^[-*]{3,}$/gm, '');
@@ -50,4 +50,3 @@ export function stripMarkdown(text: string): string {
 
   return cleanText;
 }
-
