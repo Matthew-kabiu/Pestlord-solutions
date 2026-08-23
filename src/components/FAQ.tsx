@@ -7,29 +7,30 @@ export default function FAQ({ faqs, title, subtitle }: { faqs: FAQItem[]; title?
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-20 md:py-28 bg-surface-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {(title || subtitle) && (
-          <div className="text-center mb-12">
-            {title && <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>}
-            {subtitle && <p className="text-lg text-gray-600">{subtitle}</p>}
+          <div className="reveal text-center mb-14">
+            <div className="section-divider mx-auto mb-6" />
+            {title && <h2 className="text-3xl md:text-4xl font-display font-bold text-surface-900 tracking-tight mb-3">{title}</h2>}
+            {subtitle && <p className="text-surface-500 text-lg">{subtitle}</p>}
           </div>
         )}
 
-        <div className="max-w-3xl mx-auto divide-y divide-gray-200 bg-white rounded-lg shadow">
+        <div className="max-w-3xl mx-auto space-y-3">
           {faqs.map((item, idx) => (
-            <div key={idx} className="p-4">
+            <div key={idx} className="reveal bg-white rounded-2xl border border-surface-100 overflow-hidden transition-all hover:shadow-soft">
               <button
                 type="button"
                 onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                className="w-full flex items-center justify-between text-left"
+                className="w-full flex items-center justify-between text-left p-5"
                 aria-expanded={openFaq === idx}
               >
-                <span className="text-base md:text-lg font-semibold text-gray-900">{item.q}</span>
-                <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform ${openFaq === idx ? 'rotate-180' : ''}`} />
+                <span className="font-display font-semibold text-surface-900 text-sm md:text-base pr-4">{item.q}</span>
+                <ChevronDown className={`h-5 w-5 text-surface-400 flex-shrink-0 transition-transform duration-200 ${openFaq === idx ? 'rotate-180' : ''}`} />
               </button>
               {openFaq === idx && (
-                <div className="mt-3 text-gray-600 text-sm md:text-base">
+                <div className="px-5 pb-5 text-surface-500 text-sm leading-relaxed border-t border-surface-100 pt-4">
                   {item.a}
                 </div>
               )}
@@ -40,5 +41,3 @@ export default function FAQ({ faqs, title, subtitle }: { faqs: FAQItem[]; title?
     </section>
   );
 }
-
-
