@@ -1,7 +1,5 @@
-// FloatingActionButton component with menu for WhatsApp and AI Chatbot
-
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Bot, X, Phone } from 'lucide-react';
+import { X, MessageCircle, Bot, Phone } from 'lucide-react';
 import ChatbotModal from './Chatbot/ChatbotModal';
 
 export default function FloatingActionButton() {
@@ -9,103 +7,75 @@ export default function FloatingActionButton() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
       }
     }
-
-    if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isMenuOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
 
-  // Prevent body scroll when chatbot is open
   useEffect(() => {
-    if (isChatbotOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+    document.body.style.overflow = isChatbotOpen ? 'hidden' : 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
   }, [isChatbotOpen]);
 
   const handleWhatsAppClick = () => {
-    // WhatsApp number - update with actual number
-    const whatsappNumber = '254700000000'; // Format: country code + number without +
-    const message = encodeURIComponent('Hello, I need help with pest control services.');
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-    
-    window.open(whatsappUrl, '_blank');
+    window.open('https://wa.me/254700000000?text=' + encodeURIComponent('Hello, I need help with pest control services.'), '_blank');
     setIsMenuOpen(false);
-  };
-
-  const handleChatbotClick = () => {
-    setIsChatbotOpen(true);
-    setIsMenuOpen(false);
-  };
-
-  const handleCloseChatbot = () => {
-    setIsChatbotOpen(false);
   };
 
   return (
     <>
-      {/* Floating Action Button */}
       <div ref={menuRef} className="fixed bottom-6 right-6 z-40">
-        {/* Menu Items */}
         {isMenuOpen && (
-          <div className="absolute bottom-20 right-0 flex flex-col gap-3 mb-2 animate-fade-in">
-            {/* WhatsApp Button */}
+          <div className="absolute bottom-20 right-0 flex flex-col gap-3 mb-2">
             <button
               onClick={handleWhatsAppClick}
-              className="flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-green-700 transition-all transform hover:scale-105 animate-slide-up"
+              className="flex items-center gap-3 bg-white text-surface-700 px-5 py-3 rounded-2xl shadow-soft-lg hover:shadow-soft-xl transition-all btn-press border border-surface-100 animate-fab-in"
+              style={{ animationDelay: '0.05s' }}
               aria-label="Contact us on WhatsApp"
             >
-              <Phone className="h-5 w-5" />
-              <span className="font-medium">WhatsApp</span>
+              <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center">
+                <Phone className="h-4 w-4 text-white" />
+              </div>
+              <div className="text-left whitespace-nowrap">
+                <p className="text-xs text-surface-400 font-medium">WhatsApp</p>
+                <p className="text-sm font-semibold text-surface-900">Chat with us</p>
+              </div>
             </button>
 
-            {/* AI Chatbot Button */}
             <button
-              onClick={handleChatbotClick}
-              className="flex items-center gap-3 bg-green-700 text-white px-4 py-3 rounded-full shadow-lg hover:bg-green-800 transition-all transform hover:scale-105 animate-slide-up"
+              onClick={() => { setIsChatbotOpen(true); setIsMenuOpen(false); }}
+              className="flex items-center gap-3 bg-white text-surface-700 px-5 py-3 rounded-2xl shadow-soft-lg hover:shadow-soft-xl transition-all btn-press border border-surface-100 animate-fab-in"
+              style={{ animationDelay: '0s' }}
               aria-label="Talk with AI Assistant"
             >
-              <Bot className="h-5 w-5" />
-              <span className="font-medium">Chatbot</span>
+              <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <div className="text-left whitespace-nowrap">
+                <p className="text-xs text-surface-400 font-medium">PestPal AI</p>
+                <p className="text-sm font-semibold text-surface-900">Ask anything</p>
+              </div>
             </button>
           </div>
         )}
 
-        {/* Main FAB Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className={`w-14 h-14 bg-green-700 text-white rounded-full shadow-lg hover:bg-green-800 transition-all transform hover:scale-110 flex items-center justify-center ${
+          className={`w-14 h-14 bg-brand-600 text-white rounded-2xl shadow-brand-lg hover:shadow-brand transition-all btn-press flex items-center justify-center ${
             isMenuOpen ? 'rotate-45' : 'rotate-0'
           }`}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
         >
-          {isMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <MessageCircle className="h-6 w-6" />
-          )}
+          {isMenuOpen ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Chatbot Modal */}
-      <ChatbotModal isOpen={isChatbotOpen} onClose={handleCloseChatbot} />
+      <ChatbotModal isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />
     </>
   );
 }
-
