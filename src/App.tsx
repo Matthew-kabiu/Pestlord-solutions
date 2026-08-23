@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import FloatingActionButton from './components/FloatingActionButton';
@@ -13,18 +13,35 @@ type Page = 'home' | 'services' | 'booking' | 'contact' | 'admin';
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
+  // Scroll reveal observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const elements = document.querySelectorAll('.reveal, .stagger-children');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [currentPage]);
+
   const handleNavigate = (page: string) => {
-    // Handle "about" navigation by scrolling to the about section on home page
     if (page === 'about') {
       if (currentPage !== 'home') {
         setCurrentPage('home');
-        // Wait for page to render, then scroll to about section
         setTimeout(() => {
           const aboutSection = document.getElementById('about-section');
           if (aboutSection) {
             aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        }, 100);
+        }, 150);
       } else {
         const aboutSection = document.getElementById('about-section');
         if (aboutSection) {
@@ -56,9 +73,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-surface-0">
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
-      {renderPage()}
+      <main>{renderPage()}</main>
       {currentPage !== 'admin' && <Footer />}
       {currentPage !== 'admin' && <FloatingActionButton />}
     </div>
