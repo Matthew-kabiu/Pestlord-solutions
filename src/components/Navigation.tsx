@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Menu, X, Bug, Phone as PhoneIcon, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, Bug, Phone as PhoneIcon, ArrowRight } from 'lucide-react';
 
 interface NavigationProps {
   currentPage?: string;
@@ -8,6 +8,13 @@ interface NavigationProps {
 
 export default function Navigation({ currentPage = 'home', onNavigate }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -24,25 +31,38 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
   };
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'glass shadow-soft'
+          : 'bg-white/60 backdrop-blur-sm'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Left: Logo */}
-          <div className="flex items-center cursor-pointer" onClick={() => handleNavClick('home')}>
-            <Bug className="h-8 w-8 text-green-700" />
-            <span className="ml-2 text-xl font-bold text-gray-900">Pestlords Fumigation</span>
-          </div>
+        <div className="flex justify-between items-center h-16 lg:h-18">
+          {/* Logo */}
+          <button
+            onClick={() => handleNavClick('home')}
+            className="flex items-center gap-2.5 group focus-ring"
+          >
+            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105">
+              <Bug className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-display font-bold text-surface-900 tracking-tight">
+              Pestlord
+            </span>
+          </button>
 
-          {/* Middle: Page Links */}
-          <div className="hidden md:flex space-x-8 items-center">
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                className={`relative px-4 py-2 text-sm font-medium transition-colors duration-200 focus-ring after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
                   currentPage === item.id
-                    ? 'text-green-700 border-b-2 border-green-700'
-                    : 'text-gray-700 hover:text-green-700'
+                    ? 'text-brand-700 after:w-6 after:bg-brand-600'
+                    : 'text-surface-500 hover:text-surface-900 after:w-0 after:bg-surface-400 hover:after:w-6'
                 }`}
               >
                 {item.label}
@@ -50,63 +70,67 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
             ))}
           </div>
 
-          {/* Right: Buttons and Phone */}
-          <div className="hidden md:flex space-x-4 items-center">
-            <button
-              onClick={() => handleNavClick('contact')}
-              className="bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-800 transition-colors flex items-center gap-2"
+          {/* Desktop CTA */}
+          <div className="hidden lg:flex items-center gap-3">
+            <a
+              href="tel:+254700000000"
+              className="flex items-center gap-2 text-sm font-medium text-surface-600 hover:text-surface-900 transition-colors"
             >
-              <FileText className="h-4 w-4" />
-              <span>Get a Quote</span>
-            </button>
-            <a href="tel:+254700000000" className="text-gray-700 hover:text-green-700 text-sm font-medium flex items-center gap-2">
               <PhoneIcon className="h-4 w-4" />
               <span>+254 700 000 000</span>
             </a>
+            <button
+              onClick={() => handleNavClick('contact')}
+              className="bg-brand-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand-700 transition-all duration-200 inline-flex items-center gap-2 btn-press shadow-brand hover:shadow-brand-lg"
+            >
+              <span>Get a Quote</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-green-700"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-surface-600 hover:bg-surface-100 transition-colors focus-ring"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
 
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t">
-          <div className="px-2 pt-2 pb-3 space-y-1">
+        <div className="lg:hidden glass border-t border-surface-200 animate-fade-in">
+          <div className="px-4 pt-3 pb-4 space-y-1">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+                className={`block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors ${
                   currentPage === item.id
-                    ? 'bg-green-50 text-green-700'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-brand-50 text-brand-700'
+                    : 'text-surface-700 hover:bg-surface-100'
                 }`}
               >
                 {item.label}
               </button>
             ))}
-            <button
-              onClick={() => handleNavClick('contact')}
-              className="block w-full text-left bg-green-700 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-green-800 flex items-center gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              <span>Get a Quote</span>
-            </button>
-            <a
-              href="tel:+254700000000"
-              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-            >
-              <PhoneIcon className="h-4 w-4" />
-              <span>+254 700 000 000</span>
-            </a>
+            <div className="pt-2 space-y-2">
+              <button
+                onClick={() => handleNavClick('contact')}
+                className="block w-full bg-brand-600 text-white px-4 py-3 rounded-xl text-base font-semibold hover:bg-brand-700 transition-colors inline-flex items-center justify-center gap-2 btn-press shadow-brand"
+              >
+                <span>Get a Quote</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <a
+                href="tel:+254700000000"
+                className="block w-full text-center px-4 py-3 rounded-xl text-base font-medium text-surface-700 hover:bg-surface-100 transition-colors"
+              >
+                +254 700 000 000
+              </a>
+            </div>
           </div>
         </div>
       )}
