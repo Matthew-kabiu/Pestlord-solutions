@@ -1,5 +1,3 @@
-// ChatInput component for text input
-
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Send } from 'lucide-react';
 
@@ -14,16 +12,8 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
 
   const handleSend = () => {
     const trimmedText = inputText.trim();
-    
-    // Don't send if text is empty
-    if (!trimmedText) {
-      return;
-    }
-
-    // Send message
+    if (!trimmedText) return;
     onSendMessage(trimmedText);
-
-    // Clear input
     setInputText('');
   };
 
@@ -35,35 +25,29 @@ export default function ChatInput({ onSendMessage, isLoading }: ChatInputProps) 
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
-      {/* Input Area */}
-      <div className="flex gap-2 items-center">
-        {/* Text Input */}
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            ref={inputRef}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me anything..."
-            disabled={isLoading}
-            className="w-full px-4 py-3 bg-gray-100 border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none disabled:bg-gray-200 disabled:cursor-not-allowed text-gray-900 placeholder-gray-500"
-          />
-        </div>
-
-        {/* Send Button */}
+    <div className="border-t border-surface-100 px-5 py-4">
+      <div className="flex gap-2.5 items-center">
+        <input
+          type="text"
+          ref={inputRef}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="Ask me anything..."
+          disabled={isLoading}
+          className="flex-1 px-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all disabled:bg-surface-100 disabled:cursor-not-allowed"
+        />
         <button
           type="button"
           onClick={handleSend}
           disabled={isLoading || !inputText.trim()}
-          className="w-10 h-10 bg-green-700 text-white rounded-full hover:bg-green-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-10 h-10 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-all disabled:bg-surface-300 disabled:cursor-not-allowed flex items-center justify-center btn-press shadow-brand"
           aria-label="Send message"
         >
           {isLoading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <Send className="h-5 w-5" />
+            <Send className="h-4 w-4" />
           )}
         </button>
       </div>
