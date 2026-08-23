@@ -28,7 +28,7 @@ coverage/
 *.sw?
 
 # Environment variables
-.env
+.env*
 
 # Logs
 logs/
@@ -68,3 +68,14 @@ Desktop.ini
 *.tmp
 *.temp
 .cache/
+
+# Local operating documents
+SOP.md
+Changelog.md
+Agenthandoff.md
+STACK.md
+
+# Backups
+*.bak
+*.dump
+backups/
