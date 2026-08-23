@@ -63,7 +63,19 @@ function getApiUrl(): string {
   if (!apiUrl) {
     throw new Error('OpenRouter API URL not configured. Please set VITE_OPENROUTER_API_URL in your .env file.');
   }
-  return apiUrl;
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(apiUrl);
+  } catch {
+    throw new Error('OpenRouter API URL is invalid.');
+  }
+
+  if (parsedUrl.protocol !== 'https:' || parsedUrl.hostname !== 'openrouter.ai') {
+    throw new Error('OpenRouter API URL must use HTTPS on openrouter.ai.');
+  }
+
+  return parsedUrl.toString();
 }
 
 /**
@@ -189,7 +201,7 @@ async function handleStreamResponse(response: Response): Promise<string> {
             if (content) {
               fullContent += content;
             }
-          } catch (e) {
+          } catch {
             // Skip invalid JSON lines
             continue;
           }
@@ -226,4 +238,3 @@ export function validateApiConfig(): { valid: boolean; errors: string[] } {
     errors
   };
 }
-
