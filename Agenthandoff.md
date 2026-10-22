@@ -121,10 +121,10 @@ Related Obsidian notes: <Wiki links or "None">
 
 ## Handoff Log
 
-### 2026-10-22 - v1.0.0 dual-repository release preparation
+### 2026-10-22 - v1.0.0 dual-repository release verified
 
 Author: OpenCode
-Status: In Progress (local release checks complete; remote checks pending)
+Status: Complete (publication verified; live deployment separately gated)
 References: Matt approved both repositories, checks/builds, commit/main/tag pushes and image/version env fields; explicitly no gstack.
 Related Obsidian notes: [[Templates/Build-Release-SOP]], [[Matt's Projects/Pestlord Solutions/02 - Architecture and Security]]
 
@@ -134,18 +134,25 @@ Related Obsidian notes: [[Templates/Build-Release-SOP]], [[Matt's Projects/Pestl
 - Restored the sanctioned commit wrapper and width checker verbatim from Obsidian into ignored .claude/hooks; no gstack tooling used.
 
 #### Current State
-- Ready for reviewed commit and fast-forward publication to personal and organization remotes.
+- Release commit 3757d0e57f143ec941286d06beca5877fc98d13c and annotated v1.0.0 are published to both remotes.
+- Personal release: https://github.com/Matthew-kabiu/Pestlord-solutions/releases/tag/v1.0.0
+- Organization release: https://github.com/Spooky-Organization/Pestlord_Solutions/releases/tag/v1.0.0
 - Real env files still require the quote webhook in both and production site origin. Only the explicitly approved production image/version fields changed during release preparation.
 
 #### Verification
 - Passed: lint, all type checks, 11 tests, build, client-secret check, runtime audit (zero), both Compose configs and workflow YAML parse.
 - Passed: linux/amd64 Docker image and production HTTP smoke with a second runtime SITE_URL using the same image and no rebuild. No live upstream calls.
 - Development HTTP checks passed in the release session; subsequent process interruptions while serving Vite were cleaned up. The final release-critical probe used compiled Node tooling and production-only mode.
-- Pending: both main/tag CI runs, release workflows, release assets and anonymous GHCR manifests. No live-host switch or visibility change authorized.
+- Passed: personal main CI 39727822747, tag CI 39727966695, release 39727966693.
+- Passed: organization main CI 39727829154, tag CI 39727970982, release 39727971091.
+- Passed: both GitHub Releases contain uploaded docker-compose.yml and production.env.example assets.
+- Passed: personal full/minor/latest manifests return HTTP 200 anonymously, digest sha256:2b7f258aa3f67f90e60f229e41f6cce842f8140953b136edb889c59308095453.
+- Organization image publication digest: sha256:a5804bf97ee11c2f94f95fc104d0189769906b13846872830cc804119532b38b. Anonymous token request returns HTTP 401; Matt explicitly chose private organization packaging. This is the approved anonymous-pull exception; no visibility changed.
+- No live-host deployment was performed.
 
 #### Next Actions
-- Publish the reviewed source, watch both main CI runs, push v1.0.0 to both, verify remote artifacts and record evidence in the project's release workflow note.
-- If an organization package is private, ask Matt before changing its visibility.
+- Matt/host operator: fill missing runtime configuration, authenticate for the private organization package if selected, and explicitly approve the live-host switch.
+- Future releases: follow docs/RELEASE.md and the Obsidian 09 workflow note. No gstack is used.
 
 ### 2026-10-22 - Hono gateway and environment/CI/SEO implementation
 

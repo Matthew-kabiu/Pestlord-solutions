@@ -36,6 +36,23 @@ environment-independent shell/assets. Hono reads runtime configuration once at
 startup and inserts deployment metadata on each page request. The shell is not
 pre-rendered with a deployment origin.
 
+## Verified v1.0.0 publication
+
+The release source is commit `3757d0e57f143ec941286d06beca5877fc98d13c` on both remotes.
+
+| Repository | Main CI | Tag CI | Release workflow |
+| --- | --- | --- | --- |
+| Personal | [passed](https://github.com/Matthew-kabiu/Pestlord-solutions/actions/runs/39727822747) | [passed](https://github.com/Matthew-kabiu/Pestlord-solutions/actions/runs/39727966695) | [passed](https://github.com/Matthew-kabiu/Pestlord-solutions/actions/runs/39727966693) |
+| Organization | [passed](https://github.com/Spooky-Organization/Pestlord_Solutions/actions/runs/39727829154) | [passed](https://github.com/Spooky-Organization/Pestlord_Solutions/actions/runs/39727970982) | [passed](https://github.com/Spooky-Organization/Pestlord_Solutions/actions/runs/39727971091) |
+
+Both GitHub Releases exist with uploaded Compose and environment-template assets.
+The personal `1.0.0`, `1.0` and `latest` manifests return HTTP 200 anonymously.
+The organization package returns HTTP 401 anonymously; Matt explicitly selected
+**keep organization private**, approving the exception to the SOP's anonymous-pull
+requirement for that artifact. Its release and image publication succeeded, but
+adopters need authorized package access. No visibility change or live-host
+deployment was performed.
+
 ## Run a release
 
 Download `docker-compose.yml` and `production.env.example` from the chosen GitHub

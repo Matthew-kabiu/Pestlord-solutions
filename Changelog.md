@@ -46,11 +46,11 @@ References: <Issue, PR, release, or "None">
 
 Remove sections that do not apply to a specific entry.
 
-## 2026-10-22 - Prepare v1.0.0 portable release for both repositories
+## 2026-10-22 - v1.0.0 portable release published to both repositories
 
-Status: In Progress (local checks passed; remote publication pending)
+Status: Released (personal public; organization private by Matt's decision)
 Owner: OpenCode, approved by Matt
-References: Obsidian Templates/Build-Release-SOP.md
+References: Obsidian Templates/Build-Release-SOP.md; release source 3757d0e
 
 ### Changed
 - Manifest/lockfile version is 1.0.0. Separate CI and tag-only release workflows.
@@ -66,7 +66,10 @@ References: Obsidian Templates/Build-Release-SOP.md
 ### Verification
 - Passed: lint, all type checks, 11 tests, production build, client-secret check, runtime audit (zero), both Compose validations and workflow YAML parsing.
 - Passed: production Docker build without env files and runtime-only HTTP probe, including alternate SITE_URL from the same image. Development HTTP checks passed before the runtime-origin probe; later workstation process interruptions were cleaned up, and the release-critical production-only probe passed.
-- Pending: main/tag CI, release runs, GitHub releases and anonymous package probes on both repositories.
+- Passed: main and tag CI on both repositories; both release workflows and GitHub Releases with Compose/env-template assets.
+- Passed: anonymous personal image manifests for full-version, minor-version and latest tags, all HTTP 200 with the release digest.
+- Organization artifact: published successfully; anonymous token HTTP 401. Matt explicitly chose to keep it private, an approved exception to the SOP's anonymous-pull requirement.
+- Not run: live-host deployment. The host must migrate its runtime env before switching to the pull file.
 
 ## 2026-10-22 - Hono gateway, environment isolation, container checks and SEO
 
