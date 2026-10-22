@@ -29,6 +29,8 @@ coverage/
 
 # Environment variables
 .env*
+**/.env
+**/.env.*
 
 # Logs
 logs/
@@ -79,3 +81,14 @@ STACK.md
 *.bak
 *.dump
 backups/
+build/
+.vite/
+test-results/
+playwright-report/
+*.backup
+*.sql.gz
+*.pem
+*.key
+.claude/
+.opencode/
+.verification-*/

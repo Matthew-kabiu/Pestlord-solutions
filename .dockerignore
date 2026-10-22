@@ -1,60 +1,31 @@
-# Dependencies
-node_modules
-npm-debug.log
-yarn-error.log
-
-# Build output
-dist
-build
-.vite
-
-# Environment files
-# .env - Keep this commented out if you want to include .env in Docker build
-# Uncomment the line below if you want to exclude .env and use build args instead
-# .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS files
+node_modules/
+dist/
+build/
+coverage/
+.env
+.env.*
+**/.env
+**/.env.*
+config/*.env.example
+.git/
+.github/
+.claude/
+.opencode/
+.verification-*/
+.idea/
+.vscode/
+.cache/
+.npm/
+**/*.md
+docs/
+backups/
+**/*.bak
+**/*.dump
+**/*.log
+**/*.tmp
+**/*.tsbuildinfo
+**/*.test.ts
+tests/
+prisma/
 .DS_Store
-Thumbs.db
-
-# Git
-.git
-.gitignore
-.gitattributes
-
-# Documentation
-README.md
-*.md
-!public/images/README.md
-
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-
-# CI/CD
-.github
-.gitlab-ci.yml
-
-# Tests
-coverage
-*.test.js
-*.spec.js
-
-# Prisma migrations (if not needed)
-prisma/migrations
-
-# Logs
-logs
-*.log
+docker-compose*.yml

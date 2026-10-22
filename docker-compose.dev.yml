@@ -1,0 +1,40 @@
+name: pestlord-development
+services:
+  api:
+    build:
+      context: .
+      target: development
+    init: true
+    command: npm run dev:api
+    env_file: .env.development
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./server:/app/server:ro
+      - ./seo:/app/seo:ro
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://' + process.env.HEALTHCHECK_HOST + ':' + process.env.API_PORT + '/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    mem_limit: 256m
+  web:
+    build:
+      context: .
+      target: development
+    init: true
+    command: npm run dev:web
+    ports:
+      - "${APP_HOST:?Set APP_HOST}:${APP_PORT:?Set APP_PORT}:${WEB_PORT:?Set WEB_PORT}"
+    volumes:
+      - ./src:/app/src:ro
+      - ./seo:/app/seo:ro
+      - ./public:/app/public:ro
+      - ./index.html:/app/index.html:ro
+      - ./vite.config.ts:/app/vite.config.ts:ro
+      - ./.env.development:/app/.env.development:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 768m

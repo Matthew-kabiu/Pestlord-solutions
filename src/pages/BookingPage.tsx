@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { CheckCircle, AlertCircle, Calendar, Send, ArrowRight, Home, Phone } from 'lucide-react';
 import { IMAGES } from '../constants/images';
+import { api } from '../lib/api';
 
 interface BookingPageProps {
   onNavigate: (page: string) => void;
@@ -19,12 +20,8 @@ export default function BookingPage({ onNavigate }: BookingPageProps) {
     setLoading(true);
     setError('');
     try {
-      const n8nWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL as string | undefined;
-      if (!n8nWebhookUrl) throw new Error('Booking webhook not configured.');
-      const response = await fetch(n8nWebhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, submitted_at: new Date().toISOString(), source: 'website-booking' }),
+      const response = await api.api.booking.$post({
+        json: { ...formData, submitted_at: new Date().toISOString(), source: 'website-booking' },
       });
       if (!response.ok) throw new Error(`Webhook request failed (${response.status}).`);
       setSubmitted(true);

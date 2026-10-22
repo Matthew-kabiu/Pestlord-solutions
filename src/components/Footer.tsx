@@ -4,9 +4,9 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
-    { label: 'Services', href: '#services' },
-    { label: 'About Us', href: '#about' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'Services', href: '/services' },
+    { label: 'About Us', href: '/#about-section' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   const socialLinks = [

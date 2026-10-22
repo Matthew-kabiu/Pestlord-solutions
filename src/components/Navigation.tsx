@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Bug, Phone as PhoneIcon, ArrowRight } from 'lucide-react';
+import { pagePath } from '../../seo/pages';
 
 interface NavigationProps {
   currentPage?: string;
@@ -56,9 +57,13 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
-              <button
+              <a
                 key={item.id}
-                onClick={() => handleNavClick(item.id)}
+                href={item.id === 'about' ? '/#about-section' : pagePath(item.id)}
+                onClick={(event) => {
+                  if (!onNavigate || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault(); handleNavClick(item.id);
+                }}
                 className={`relative px-4 py-2 text-sm font-medium transition-colors duration-200 focus-ring after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
                   currentPage === item.id
                     ? 'text-brand-700 after:w-6 after:bg-brand-600'
@@ -66,7 +71,7 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
                 }`}
               >
                 {item.label}
-              </button>
+              </a>
             ))}
           </div>
 
@@ -104,9 +109,13 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
         <div className="lg:hidden glass border-t border-surface-200 animate-fade-in">
           <div className="px-4 pt-3 pb-4 space-y-1">
             {navItems.map((item) => (
-              <button
+              <a
                 key={item.id}
-                onClick={() => handleNavClick(item.id)}
+                href={item.id === 'about' ? '/#about-section' : pagePath(item.id)}
+                onClick={(event) => {
+                  if (!onNavigate || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault(); handleNavClick(item.id);
+                }}
                 className={`block w-full text-left px-4 py-3 rounded-xl text-base font-medium transition-colors ${
                   currentPage === item.id
                     ? 'bg-brand-50 text-brand-700'
@@ -114,7 +123,7 @@ export default function Navigation({ currentPage = 'home', onNavigate }: Navigat
                 }`}
               >
                 {item.label}
-              </button>
+              </a>
             ))}
             <div className="pt-2 space-y-2">
               <button

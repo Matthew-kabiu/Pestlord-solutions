@@ -1,230 +1,88 @@
-# 🐳 Docker Setup for PestLord Solutions
+# Docker environments and releases
 
-This guide will help you build and run the PestLord Solutions application using Docker.
+## Production: pull the released artifact
 
-## 📋 Prerequisites
+Download `docker-compose.yml` and `production.env.example` from a GitHub Release.
+Copy the example to `.env.production`, fill every blank, and set `APP_IMAGE` to
+the chosen repository's lowercase GHCR image base. `PESTLORD_VERSION` selects the
+release tag. The production file contains no `build:` section or source mounts.
 
-- Docker installed (version 20.10 or higher)
-- Docker Compose installed (version 2.0 or higher)
-- At least 2GB free disk space
-
-## 🚀 Quick Start
-
-### Build and Run with Docker Compose
-
-```bash
-# Build and start the container
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop the container
-docker-compose down
+```sh
+docker compose --env-file .env.production config --quiet
+docker compose --env-file .env.production pull
+docker compose --env-file .env.production up -d --wait
 ```
 
-The application will be available at: **http://localhost:3012**
+Updating or rolling back means selecting a published `PESTLORD_VERSION` and
+repeating pull/up. No Node/npm installation or checkout is required on the host.
+Private organization packages require authorized registry login; public anonymous
+access is verified separately for each package.
 
----
+Hono serves the built frontend and same-origin API. Public traffic maps
+`APP_HOST:APP_PORT` to `API_PORT`, all read from the private environment file.
+Terminate HTTPS at the platform/reverse proxy with the matching HTTPS `SITE_URL`.
+The container runs as the Node user with a read-only filesystem, dropped
+capabilities, bounded memory/processes, health checks and graceful shutdown.
 
-## 🔧 Manual Docker Build
+## Development: build with hot reload
 
-If you prefer to build manually without docker-compose:
+From the source checkout, follow [ENVIRONMENT.md](ENVIRONMENT.md), then:
 
-```bash
-# Build the Docker image
-docker build -t pestlord-solutions:latest .
-
-# Run the container
-docker run -d \
-  --name pestlord-solutions \
-  -p 3012:3012 \
-  --restart unless-stopped \
-  pestlord-solutions:latest
+```sh
+npm ci
+npm run compose:dev -- up -d --build --wait
+npm run compose:dev -- ps
+npm run compose:dev -- logs --tail=50
+npm run compose:dev -- down
 ```
 
-Access the application at: **http://localhost:3012**
+Vite publishes `APP_HOST:APP_PORT` to `WEB_PORT`. Hono's `API_PORT` is internal;
+`API_UPSTREAM_HOST` points the Vite proxy at that service. Source mounts are
+read-only. Rebuild after dependency changes and recreate after env changes.
 
----
+The source wrapper validates and explicitly selects its private file:
 
-## 🛠️ Development Commands
+| Wrapper | Compose file | Environment |
+| --- | --- | --- |
+| `npm run compose:dev -- <args>` | `docker-compose.dev.yml` | `.env.development` |
+| `npm run compose:prod -- <args>` | `docker-compose.yml` | `.env.production` |
 
-```bash
-# View running containers
-docker ps
+For source maintainers only, an approved local production build is:
 
-# View container logs
-docker logs pestlord-solutions
-docker logs -f pestlord-solutions  # Follow logs
-
-# Stop and remove container
-docker-compose down
-
-# Rebuild after code changes
-docker-compose up -d --build
-
-# Remove all containers and images
-docker-compose down -v --rmi all
+```sh
+docker build --platform linux/amd64 --target production -t "${APP_IMAGE}:${PESTLORD_VERSION}" .
 ```
 
----
+Load those two values from the chosen env file in your shell before this command.
+The production Compose file never builds. Never share resolved Compose output
+without redaction; use `config --quiet` for validation.
 
-## 🌍 Environment Variables
+## CI and releases
 
-Create a `.env` file (for local development, not needed in production):
+`ci.yml` runs lint, all TypeScript projects, Vitest, frontend/backend builds,
+client-secret checks, runtime dependency audit, env/Compose validation and workflow
+YAML parsing on pushes/PRs. `release.yml` runs only for version tags, checks the
+manifest/tag match, waits for tag CI, builds one `linux/amd64` artifact per
+repository and publishes full/minor/latest GHCR tags plus a GitHub Release.
 
-```env
-VITE_N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook
-VITE_N8N_QUOTE_WEBHOOK_URL=https://your-n8n-instance.com/quote-webhook
-VITE_N8N_CONTACT_WEBHOOK_URL=https://your-n8n-instance.com/contact-webhook
-```
+Release assets contain the pull file and a blank env template with the correct
+repository image base. The image digest appears in the release notes. Both
+repositories use the same reviewed source. No live deployment or package visibility
+change is implied by artifact publication. See [RELEASE.md](RELEASE.md).
 
-**Note:** Since this is a static React app, environment variables need to be set at build time (before `npm run build`), not at runtime. For production, configure these in your CI/CD pipeline or build process.
+## Runtime-only verification
 
----
+With Matt's build approval, `npx tsx scripts/verify-docker.ts` makes an isolated,
+ignored checkout, creates fake env files, validates both Compose files, builds
+the production image without env files and runs HTTP smoke checks. It verifies
+development and production routes, then changes the runtime site origin and
+recreates the same image with `--no-build` to prove metadata is not baked.
+No model credits or real submissions are used. Test containers/networks and the
+temporary checkout are cleaned up.
 
-## 📦 Architecture
+Use `--production-only` when running the compiled smoke script to verify the
+release artifact without starting a second development server on a busy workstation.
 
-### Multi-Stage Build
-
-1. **Builder Stage**: Builds the React application with Vite
-2. **Production Stage**: Serves the built static files using Nginx
-
-### Container Details
-
-- **Base Image**: `node:20-alpine` (build), `nginx:alpine` (production)
-- **Port**: 3012
-- **HTTP Server**: Nginx
-- **Restart Policy**: unless-stopped
-
----
-
-## 🔍 Troubleshooting
-
-### Container won't start
-
-```bash
-# Check container status
-docker ps -a
-
-# View error logs
-docker logs pestlord-solutions
-
-# Check if port 3012 is already in use
-lsof -i :3012
-```
-
-### Port already in use
-
-Change the port in `docker-compose.yml`:
-
-```yaml
-ports:
-  - "3013:3012"  # Change first number to available port
-```
-
-### Rebuild after dependencies change
-
-```bash
-# Remove old image and rebuild
-docker-compose down
-docker-compose up -d --build --force-recreate
-```
-
-### Clear Docker cache
-
-```bash
-# Remove all unused images
-docker image prune -a
-
-# Remove all unused containers
-docker container prune
-
-# Full cleanup
-docker system prune -a
-```
-
----
-
-## 🎯 Production Deployment
-
-### 1. Build for Production
-
-```bash
-# Build optimized production image
-docker build -t pestlord-solutions:production .
-
-# Tag for registry
-docker tag pestlord-solutions:production your-registry/pestlord-solutions:v1.0.0
-```
-
-### 2. Push to Registry (Optional)
-
-```bash
-# Login to registry
-docker login your-registry.com
-
-# Push image
-docker push your-registry/pestlord-solutions:v1.0.0
-```
-
-### 3. Deploy on Server
-
-```bash
-# Pull and run on production server
-docker pull your-registry/pestlord-solutions:v1.0.0
-docker run -d -p 3012:3012 --name pestlord-solutions your-registry/pestlord-solutions:v1.0.0
-```
-
----
-
-## 📊 Health Check
-
-The container includes a health check that monitors the application status:
-
-```bash
-# Check health status
-docker inspect --format='{{.State.Health.Status}}' pestlord-solutions
-```
-
-Expected output: `healthy`
-
----
-
-## 🔒 Security Notes
-
-1. The Nginx configuration includes security headers
-2. Static files are served efficiently with gzip compression
-3. Client-side routing is properly handled for React SPA
-4. Cache headers are set appropriately for static assets
-
----
-
-## 📝 File Structure
-
-```
-.
-├── Dockerfile                 # Multi-stage build configuration
-├── docker-compose.yml        # Docker Compose setup
-├── .dockerignore             # Files to exclude from build
-├── nginx.conf                # Nginx server configuration
-└── dist/                     # Build output (created during build)
-```
-
----
-
-## 🆘 Need Help?
-
-- Check logs: `docker-compose logs -f`
-- Container status: `docker ps`
-- Restart container: `docker-compose restart`
-- Full rebuild: `docker-compose up -d --build --force-recreate`
-
----
-
-## ✅ Success Indicators
-
-- Container running: `docker ps` shows `pestlord-solutions`
-- Application accessible at http://localhost:3012
-- Health check passes (use `docker inspect` command above)
-- No errors in logs: `docker logs pestlord-solutions`
+The bounded rate limiter is per process/socket peer, intentionally not trusting
+forwarded headers. A proxy therefore shares its budget; multi-replica deployments
+need separately approved shared/edge rate limiting.

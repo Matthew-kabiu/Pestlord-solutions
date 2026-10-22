@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, Clock, CheckCircle, AlertCircle, ArrowRight } from
 import FAQ from '../components/FAQ';
 import { faqs } from '../data/faqs';
 import { IMAGES } from '../constants/images';
+import { api } from '../lib/api';
 
 interface ContactPageProps {
   onNavigate: (page: string) => void;
@@ -19,12 +20,8 @@ export default function ContactPage({ onNavigate }: ContactPageProps) {
     setLoading(true);
     setError('');
     try {
-      const webhookUrl = import.meta.env.VITE_N8N_QUOTE_WEBHOOK_URL as string | undefined;
-      if (!webhookUrl) throw new Error('Quote webhook not configured.');
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, submitted_at: new Date().toISOString(), source: 'website-quote' }),
+      const response = await api.api.quote.$post({
+        json: { ...formData, submitted_at: new Date().toISOString(), source: 'website-quote' },
       });
       if (!response.ok) throw new Error(`Webhook request failed (${response.status}).`);
       setSubmitted(true);

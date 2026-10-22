@@ -121,6 +121,67 @@ Related Obsidian notes: <Wiki links or "None">
 
 ## Handoff Log
 
+### 2026-10-22 - v1.0.0 dual-repository release preparation
+
+Author: OpenCode
+Status: In Progress (local release checks complete; remote checks pending)
+References: Matt approved both repositories, checks/builds, commit/main/tag pushes and image/version env fields; explicitly no gstack.
+Related Obsidian notes: [[Templates/Build-Release-SOP]], [[Matt's Projects/Pestlord Solutions/02 - Architecture and Security]]
+
+#### What Changed
+- Both remotes were verified at the same main tip before edits; no merge or force-push is needed.
+- Followed the Build Release SOP: portability verdict table, separate CI/tag-release workflows, root pull-only Compose, explicit PESTLORD_VERSION and version 1.0.0 in manifest/lockfile.
+- Restored the sanctioned commit wrapper and width checker verbatim from Obsidian into ignored .claude/hooks; no gstack tooling used.
+
+#### Current State
+- Ready for reviewed commit and fast-forward publication to personal and organization remotes.
+- Real env files still require the quote webhook in both and production site origin. Only the explicitly approved production image/version fields changed during release preparation.
+
+#### Verification
+- Passed: lint, all type checks, 11 tests, build, client-secret check, runtime audit (zero), both Compose configs and workflow YAML parse.
+- Passed: linux/amd64 Docker image and production HTTP smoke with a second runtime SITE_URL using the same image and no rebuild. No live upstream calls.
+- Development HTTP checks passed in the release session; subsequent process interruptions while serving Vite were cleaned up. The final release-critical probe used compiled Node tooling and production-only mode.
+- Pending: both main/tag CI runs, release workflows, release assets and anonymous GHCR manifests. No live-host switch or visibility change authorized.
+
+#### Next Actions
+- Publish the reviewed source, watch both main CI runs, push v1.0.0 to both, verify remote artifacts and record evidence in the project's release workflow note.
+- If an organization package is private, ask Matt before changing its visibility.
+
+### 2026-10-22 - Hono gateway and environment/CI/SEO implementation
+
+Author: OpenCode
+Status: Ready for Review
+References: Matt's explicit Hono and local Docker approval
+Related Obsidian notes: [[Matt's Projects/Pestlord Solutions/02 - Architecture and Security]]
+
+#### What Changed
+- Added server-side Hono integration gateway, typed frontend client and fail-fast env validation.
+- Split Docker development/production setup; production serves static files and API from Hono.
+- Added GitHub Actions checks and version-tag artifact delivery, route-specific SEO and operational docs.
+
+#### Current State
+- Source changes are local and uncommitted; private env files are ignored and excluded from image builds.
+- Legacy integration values migrated without disclosure. Quote webhook missing in both files; production site origin missing. Validation deliberately blocks real startup until configured.
+- All `.claude/` tooling areas required by the persona were missing at intake and were reported; they remain outside this implementation.
+
+#### Verification
+- Passed: `npm run lint`, `npm run typecheck`, `npm test` (11 tests), `npm run build`, `npm audit --omit=dev` (zero findings).
+- Passed: `npx tsx scripts/verify-docker.ts`: isolated fake env validation, both Compose validations, production image build, development and production HTTP smoke checks. Temporary stacks/networks cleaned up.
+- First Docker attempt hit Docker Desktop's unshared system temporary path; verification now runs inside an ignored project-local directory. A subsequent killed subprocess prompted single-process smoke execution and parent cleanup. Final run passed.
+- Not run: real OpenRouter/n8n requests, browser visual acceptance, GitHub-hosted workflow or live deployment.
+
+#### Open Questions
+- Matt: set missing quote webhook and production site origin privately.
+
+#### Next Actions
+- Matt: validate each completed env file, then use the documented Compose commands.
+- Matt: approve commit/publication/deployment separately when ready.
+
+#### Risks or Watchouts
+- Existing admin UI remains unauthenticated and has no new privileged API. Rate limiting is per process/socket peer; use edge/shared limiting before multi-replica operation.
+- React body content remains client-rendered. Metadata is server-generated; full SSR/prerendering was not introduced.
+- Runtime dependency audit passes; full development-tree audit still reports advisories requiring separate dependency review.
+
 ### 2026-08-24 - Anti-slop UI redesign and 24 sub-atomic commits
 
 Author: Spooky Spectre

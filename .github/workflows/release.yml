@@ -1,0 +1,99 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  packages: write
+  actions: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check manifest/tag agreement and lowercase image name
+        id: project
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+          if (!/^v\d+\.\d+\.\d+$/.test(process.env.RELEASE_TAG) || process.env.RELEASE_TAG !== `v${version}`) {
+            throw new Error('Release tag must be vMAJOR.MINOR.PATCH and match package.json');
+          }
+          const image = `ghcr.io/${process.env.GITHUB_REPOSITORY.toLowerCase()}`;
+          appendFileSync(process.env.GITHUB_OUTPUT, `image=${image}\nversion=${version}\n`);
+          JS
+      - name: Wait for CI on this tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for attempt in $(seq 1 30); do
+            run_id=$(gh run list --workflow ci.yml --branch "$GITHUB_REF_NAME" --commit "$GITHUB_SHA" --event push --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+            if [ -n "$run_id" ]; then
+              gh run watch "$run_id" --exit-status --interval 10
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ steps.project.outputs.image }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        id: publish
+        with:
+          context: .
+          target: production
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
+      - name: Create deployment assets for this repository
+        env:
+          RELEASE_IMAGE: ${{ steps.project.outputs.image }}
+          RELEASE_VERSION: ${{ steps.project.outputs.version }}
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const template = readFileSync('config/production.env.example', 'utf8')
+            .replace(/^APP_IMAGE=.*$/m, `APP_IMAGE=${process.env.RELEASE_IMAGE}`)
+            .replace(/^PESTLORD_VERSION=.*$/m, `PESTLORD_VERSION=${process.env.RELEASE_VERSION}`);
+          writeFileSync('production.env.example', template);
+          JS
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_IMAGE: ${{ steps.project.outputs.image }}
+          RELEASE_VERSION: ${{ steps.project.outputs.version }}
+          IMAGE_DIGEST: ${{ steps.publish.outputs.digest }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" docker-compose.yml production.env.example \
+            --verify-tag --title "PestLord Solutions $RELEASE_VERSION" --generate-notes \
+            --notes "Image: $RELEASE_IMAGE:$RELEASE_VERSION. Immutable reference: $RELEASE_IMAGE@$IMAGE_DIGEST. Download the attached Compose and env example, copy the example to .env.production, fill every blank, then run docker compose --env-file .env.production pull and docker compose --env-file .env.production up -d. Host migration: rename legacy VITE integration variables to the server-only names in docs/ENVIRONMENT.md; APP_IMAGE is now the image base and PESTLORD_VERSION selects its tag. See docs/RELEASE.md."

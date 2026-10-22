@@ -7,11 +7,18 @@ import ServicesPage from './pages/ServicesPage';
 import BookingPage from './pages/BookingPage';
 import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
-
-type Page = 'home' | 'services' | 'booking' | 'contact' | 'admin';
+import PageMetadata from './components/PageMetadata';
+import { isPagePath, pagePath, pages, type PagePath } from '../seo/pages';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [path, setPath] = useState<PagePath | null>(() => isPagePath(window.location.pathname) ? window.location.pathname : null);
+  const currentPage = path ? pages[path].id : 'not-found';
+  useEffect(() => {
+    const onPopState = () => setPath(isPagePath(window.location.pathname) ? window.location.pathname : null);
+    window.addEventListener('popstate', onPopState);
+    if (window.location.hash === '#about-section') document.getElementById('about-section')?.scrollIntoView();
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   // Scroll reveal observer
   useEffect(() => {
@@ -35,7 +42,8 @@ function App() {
   const handleNavigate = (page: string) => {
     if (page === 'about') {
       if (currentPage !== 'home') {
-        setCurrentPage('home');
+        window.history.pushState({}, '', '/#about-section');
+        setPath('/');
         setTimeout(() => {
           const aboutSection = document.getElementById('about-section');
           if (aboutSection) {
@@ -51,7 +59,9 @@ function App() {
       return;
     }
 
-    setCurrentPage(page as Page);
+    const nextPath = pagePath(page);
+    window.history.pushState({}, '', nextPath);
+    setPath(nextPath);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -68,12 +78,13 @@ function App() {
       case 'admin':
         return <AdminPage />;
       default:
-        return <HomePage onNavigate={handleNavigate} />;
+        return <section className="max-w-7xl mx-auto px-4 py-20"><h1>Page not found</h1><a href="/">Return home</a></section>;
     }
   };
 
   return (
     <div className="min-h-screen bg-surface-0">
+      <PageMetadata path={path} />
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
       <main>{renderPage()}</main>
       {currentPage !== 'admin' && <Footer />}

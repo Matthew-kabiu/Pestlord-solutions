@@ -1,36 +1,22 @@
-# Multi-stage Dockerfile for PestLord Solutions
-# Stage 1: Build
-FROM node:20-alpine AS builder
-
+FROM node:24-alpine AS development
 WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
+COPY package.json package-lock.json ./
 RUN npm ci
-
-# Copy source code
 COPY . .
 
-# Copy .env file for build-time environment variables
-# Note: .env must be available in the build context (ensure it's not in .dockerignore)
-COPY .env ./.env
-
-# Build the application
+FROM development AS builder
 RUN npm run build
 
-# Stage 2: Production
-FROM nginx:alpine
+FROM node:24-alpine AS production-dependencies
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy built files from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
-EXPOSE 3012
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:24-alpine AS production
+WORKDIR /app
+COPY --from=production-dependencies --chown=node:node /app/node_modules ./node_modules
+COPY --chown=node:node package.json ./
+COPY --from=builder --chown=node:node /app/build ./build
+COPY --from=builder --chown=node:node /app/dist ./dist
+USER node
+CMD ["node", "build/server/server.js"]

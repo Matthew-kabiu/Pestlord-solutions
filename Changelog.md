@@ -46,6 +46,55 @@ References: <Issue, PR, release, or "None">
 
 Remove sections that do not apply to a specific entry.
 
+## 2026-10-22 - Prepare v1.0.0 portable release for both repositories
+
+Status: In Progress (local checks passed; remote publication pending)
+Owner: OpenCode, approved by Matt
+References: Obsidian Templates/Build-Release-SOP.md
+
+### Changed
+- Manifest/lockfile version is 1.0.0. Separate CI and tag-only release workflows.
+- Root production Compose now only pulls; development remains the only source-building Compose environment.
+- Release workflow publishes lowercase repository-specific GHCR images with full/minor/latest tags and attaches the run file and blank env template.
+- README starts with a Docker-only adopter quickstart; docs/RELEASE.md records the portability verdicts and release procedure.
+
+### Migration Notes
+- Every legacy frontend integration key maps to its server-only replacement in docs/RELEASE.md.
+- APP_IMAGE is now the registry image base; PESTLORD_VERSION selects the tag. The approved private production fields were updated without changing secrets or missing business configuration.
+- Coolify/other hosts must switch from building to the pull-only root Compose after environment migration. No live host was changed.
+
+### Verification
+- Passed: lint, all type checks, 11 tests, production build, client-secret check, runtime audit (zero), both Compose validations and workflow YAML parsing.
+- Passed: production Docker build without env files and runtime-only HTTP probe, including alternate SITE_URL from the same image. Development HTTP checks passed before the runtime-origin probe; later workstation process interruptions were cleaned up, and the release-critical production-only probe passed.
+- Pending: main/tag CI, release runs, GitHub releases and anonymous package probes on both repositories.
+
+## 2026-10-22 - Hono gateway, environment isolation, container checks and SEO
+
+Status: Released (local implementation; deployment not performed)
+Owner: OpenCode
+References: Matt's environment/CI/SEO request and Hono approval
+
+### Added
+- Hono TypeScript gateway with typed RPC client, strict schemas, server-only integrations, request limits and graceful shutdown.
+- Separate private development/production environment files, centralized validation, safe initializer and runtime-only configuration.
+- GitHub Actions quality checks, isolated Docker smoke tests and version-tag GHCR/GitHub Release delivery.
+- Crawlable public paths, server-generated head metadata, runtime robots/sitemap and a local favicon.
+
+### Changed
+- Development uses Vite plus Hono; production uses Hono for static files and API in one non-root container.
+- Removed legacy Nginx/generic Compose setup and browser-side provider credentials.
+- Updated Docker/Git ignores and setup/integration documentation.
+
+### Migration Notes
+- Fill the quote webhook in both private files and the production site origin; the old environment did not contain these values.
+- Existing integration values were migrated privately. Historically exposed credentials still need operator rotation.
+- CD publishes a pullable artifact; no live deployment target was supplied or configured.
+
+### Verification
+- Passed: lint, all TypeScript projects, 11 mocked tests, frontend/backend builds and production dependency audit (zero findings).
+- Passed: both environment contracts and Compose configurations using fake fixtures; development/production Docker HTTP smoke checks.
+- Not run: live provider/webhook calls, browser visual checks or GitHub-hosted workflow execution.
+
 ## 2026-08-24 - Anti-slop UI redesign and security hardening
 
 Status: Released
